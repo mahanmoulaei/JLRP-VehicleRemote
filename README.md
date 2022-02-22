@@ -56,4 +56,4 @@ If not, see <https://www.gnu.org/licenses/>
 </td></tr>
 <tr><td>
 This resource is a highly modified derivative of <a href='https://github.com/boostless/Boost-Locksystem'>Boost-Locksystem</a> (<a href='https://forum.cfx.re/t/release-esx-boosts-lock-system-with-metadata/4531012'>FiveM forum post</a>).
-</td></td></table>
+</td></tr></table>
