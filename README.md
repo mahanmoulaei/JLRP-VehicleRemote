@@ -33,9 +33,8 @@ TriggerServerEvent('JLRP-VehicleRemote:RemoveKey', plate)
 <br><br><br><h3 align='center'>Legal Notices</h3>
 <table><tr><td>
 Vehicle Key System for <a href='https://github.com/esx-framework/esx-legacy'>ESX-Legacy</a> and <a href='https://github.com/overextended/ox_inventory'>OX_Inventory</a>
- 
-MIT License
-
+<br></br>
+	
 Copyright (C) 2021-2022 boostless
 
 This program is free software: you can redistribute it and/or modify
