@@ -7,7 +7,7 @@ version '0.5'
 
 shared_scripts{
     '@es_extended/imports.lua',
-    '@pe-lualib/init.lua',
+    '@ox_lib/init.lua',
     'config.lua'
 } 
 

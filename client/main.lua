@@ -1,10 +1,11 @@
-local searchedVehicles = {}
-local startedEngines = {}
-local isUIOpen = false
+local searchedVeh = {}
+local startedEngine = {}
+local uiOpen = false
+local PlayerPed = nil
 local mainThread = nil
 local lockThread = nil
 local disableKeyThread = nil
-local isKeyDisabled = false
+local isESCDisabled = false
 local bulletin = exports.bulletin
 local rprogress = exports.rprogress
 
@@ -25,7 +26,7 @@ mainThread = SetInterval(function()
     if not isInVehicle then SetInterval(mainThread, 500) end
 
     if isInVehicle and GetPedInVehicleSeat(veh, -1) == PlayerPed then
-        if startedEngines[plate] == true then
+        if startedEngine[plate] == true then
             if not GetIsVehicleEngineRunning(veh) then
 				SetVehicleEngineOn(veh, true, true, false)
                 SetInterval(mainThread, 500)
@@ -50,7 +51,7 @@ if Config.LockState == 4 then
 end
 
 disableKeyThread = SetInterval(function()
-	if isUIOpen then
+	if uiOpen then
         isKeyDisabled = true
         SetInterval(disableKeyThread, 0)
         DisableAllControlActions(0)
@@ -95,7 +96,7 @@ disableKeyThread = SetInterval(function()
 		EnableControlAction(0, 30, true) 	--? INPUT_MOVE
 		EnableControlAction(0, 31, true) 	--? INPUT_MOVE
 
-    elseif not isUIOpen and isKeyDisabled then
+    elseif not uiOpen and isKeyDisabled then
         SetInterval(disableKeyThread, 500)
         isKeyDisabled = false
     end
@@ -112,14 +113,14 @@ function Search()
             return
         end
         if isInVehicle then
-            if searchedVehicles[plate] then
+            if searchedVeh[plate] then
                 Notification('error', _('no_key_veh'))
             else
 			
                 if Config.OnlyRegisteredCars then
                     ESX.TriggerServerCallback('JLRP-VehicleRemote:IsCarRegistered', function(isRegistered) 
                         if isRegistered then
-                            searchedVehicles[plate] = true
+                            searchedVeh[plate] = true
                             Notification('success', _('found_key'))
                             TriggerServerEvent('JLRP-VehicleRemote:AddKeys', plate)
                         else
@@ -127,7 +128,7 @@ function Search()
                         end
                     end, plate)
                 else
-                    searchedVehicles[plate] = true
+                    searchedVeh[plate] = true
                     Notification('success', _('found_key'))
                     TriggerServerEvent('JLRP-VehicleRemote:AddKeys', plate)
                 end
@@ -276,7 +277,7 @@ RegisterNUICallback('Engine', function(data)
             Notification('error', _('not_this_vehicle_engine'))
             return
         end
-        if not startedEngines[plate] then
+        if not startedEngine[plate] then
             Progress(_('pr_engine_on'), 1000)
             TriggerServerEvent('JLRP-VehicleRemote:SyncEngine', plate, true)
         else
@@ -393,12 +394,12 @@ end
 
 RegisterNetEvent('JLRP-VehicleRemote:Sync')
 AddEventHandler('JLRP-VehicleRemote:Sync', function(interactedVehicles, interactedEngines)
-	searchedVehicles = interactedVehicles
-    startedEngines = interactedEngines
+	searchedVeh = interactedVehicles
+    startedEngine = interactedEngines
 end)
 
 function OpenUi(plate)
-    if not isUIOpen then
+    if not uiOpen then
         SetNuiFocus(true, true)
         if Config.AllowSomeKeyboardAndMouseInputs then
             SetNuiFocusKeepInput(true)
@@ -411,12 +412,12 @@ function OpenUi(plate)
         if Config.SetMouseCursorNearRemote then
             SetCursorLocation(0.9, 0.85)
         end
-        isUIOpen = true
+        uiOpen = true
     end
 end
 
 function CloseUi()
-    if isUIOpen then
+    if uiOpen then
         SetNuiFocus(false, false)
         if Config.AllowSomeKeyboardAndMouseInputs then
             SetNuiFocusKeepInput(true)
@@ -426,7 +427,7 @@ function CloseUi()
             show = false,
             plate = ''
         })
-        isUIOpen = false
+        uiOpen = false
     end
 end
 
