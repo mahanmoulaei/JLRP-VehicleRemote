@@ -33,12 +33,16 @@ RegisterServerEvent('JLRP-VehicleRemote:AddKeys', function(_plate)
         return
     end
     
-	interactedVehicles[_plate] = true
-    Sync()
-	
     if ox_inventory:CanCarryItem(_source, 'car_key', 1) then
         ox_inventory:AddItem(_source, 'car_key', 1, {plate = _plate, description = _U('key_description',_plate)})
-    end
+		interactedVehicles[_plate] = true
+		Sync()
+    else
+		local xPlayer = ESX.GetPlayerFromId(_source)
+		if xPlayer then
+			xPlayer.showNotification('~r~ You don\'t have enough space in your inventory!')
+		end
+	end
 end)
 
 RegisterServerEvent('JLRP-VehicleRemote:RemoveKey', function(_plate)
@@ -57,7 +61,12 @@ RegisterServerEvent('JLRP-VehicleRemote:CreateKeyCopy', function(_plate)
     end
     if ox_inventory:CanCarryItem(xPlayer.source, 'car_key', 1) then
         ox_inventory:AddItem(xPlayer.source, 'car_key', 1, {plate = _plate, description = _U('key_description',_plate)})
-    end
+    else
+		local xPlayer = ESX.GetPlayerFromId(_source)
+		if xPlayer then
+			xPlayer.showNotification('~r~ You don\'t have enough space in your inventory!')
+		end
+	end
 end)
 
 RegisterServerEvent('JLRP-VehicleRemote:Sync', function()
@@ -100,13 +109,15 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
-function HasKeys(source, plate, remove)
+function HasKeys(source, vehiclePlate, remove)
+	
     local keys = ox_inventory:Search(source, 'slots', 'car_key')
+	
 	if keys then
 		for k,v in pairs(keys) do
-			if v.metadata.plate == plate then
+			if v.metadata.plate == vehiclePlate then
 				if remove then
-					ox_inventory:RemoveItem(source, 'car_key', v.slot)
+					ox_inventory:RemoveItem(source, 'car_key', v.count, v.metadata)
 					return true
 				else
 					return true
@@ -114,7 +125,25 @@ function HasKeys(source, plate, remove)
 			end
 		end
 	end
-  
+	
+	--[[
+	--TODO : Check what is wrong with this function that throws error from ox_inventory
+	local numberOfKey = ox_inventory.GetItem(source, 'car_key', {plate = vehiclePlate}, true) --this last true returns the ammount 
+	
+	if numberOfKey > 0 then
+		if remove then
+			ox_inventory:RemoveItem(source, 'car_key', numberOfKey, {plate = vehiclePlate})
+			return true
+		else
+			if numebrOfKeys > 1 then
+				ox_inventory:RemoveItem(source, 'car_key', numberOfKey-1, {plate = vehiclePlate}) --remove any extra key of the vehicle player has and leave him only 1 
+				return true
+			else	
+				return true
+			end
+		end
+	end
+	]]
     return false
 end
   
